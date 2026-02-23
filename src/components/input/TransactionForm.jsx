@@ -7,6 +7,7 @@ import Button from '../common/Button';
 import Card from '../common/Card';
 import { colors } from '../../styles/colors';
 import { FREQUENCIES } from '../../utils/constants';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const defaultForm = {
   description: '',
@@ -22,6 +23,7 @@ const defaultForm = {
 
 export default function TransactionForm({ categories = [], accounts = [], onSubmit }) {
   const [form, setForm] = useState(defaultForm);
+  const isMobile = useIsMobile();
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -50,7 +52,7 @@ export default function TransactionForm({ categories = [], accounts = [], onSubm
         Log Transaction
       </h3>
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
           <div style={{ gridColumn: '1 / -1' }}>
             <TextInput
               label="Description"
@@ -100,14 +102,14 @@ export default function TransactionForm({ categories = [], accounts = [], onSubm
             />
           </div>
 
-          <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <Toggle
               label="Recurring"
               value={form.is_recurring}
               onChange={(v) => update('is_recurring', v)}
             />
             {form.is_recurring && (
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: isMobile ? '100%' : 'auto' }}>
                 <Select
                   label="Frequency"
                   value={form.frequency}

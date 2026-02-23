@@ -3,6 +3,7 @@ import Card from '../common/Card';
 import Badge from '../common/Badge';
 import { colors } from '../../styles/colors';
 import { formatCurrency, toNumber, capitalize } from '../../utils/formatters';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const typeBadge = {
   checking: 'blue',
@@ -13,6 +14,8 @@ const typeBadge = {
 };
 
 export default function FinancialSnapshot({ accounts = [], creditScores = [], tags = [] }) {
+  const isMobile = useIsMobile();
+
   const stats = useMemo(() => {
     const assets = accounts
       .filter((a) => a.type !== 'credit_card')
@@ -37,18 +40,20 @@ export default function FinancialSnapshot({ accounts = [], creditScores = [], ta
     )[0];
   }, [creditScores]);
 
+  const cols = isMobile ? '1fr 1fr' : (latestScore ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr');
+
   return (
     <div>
       <h3 style={{ fontSize: '16px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.02em', marginBottom: '16px' }}>
         Financial Snapshot
       </h3>
 
-      <div style={{ display: 'grid', gridTemplateColumns: latestScore ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '12px', marginBottom: '20px' }}>
         <Card padding="14px">
           <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
             Net Worth
           </p>
-          <p style={{ fontSize: '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+          <p style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
             {formatCurrency(stats.total)}
           </p>
         </Card>
@@ -56,7 +61,7 @@ export default function FinancialSnapshot({ accounts = [], creditScores = [], ta
           <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
             Liquid
           </p>
-          <p style={{ fontSize: '22px', fontWeight: 600, color: colors.accent.blue, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+          <p style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: 600, color: colors.accent.blue, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
             {formatCurrency(stats.liquid)}
           </p>
         </Card>
@@ -64,7 +69,7 @@ export default function FinancialSnapshot({ accounts = [], creditScores = [], ta
           <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
             Invested
           </p>
-          <p style={{ fontSize: '22px', fontWeight: 600, color: colors.accent.purple, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+          <p style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: 600, color: colors.accent.purple, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
             {formatCurrency(stats.invested)}
           </p>
         </Card>
@@ -73,7 +78,7 @@ export default function FinancialSnapshot({ accounts = [], creditScores = [], ta
             <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
               Credit Score
             </p>
-            <p style={{ fontSize: '22px', fontWeight: 600, color: colors.status.positive, letterSpacing: '-0.03em' }}>
+            <p style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: 600, color: colors.status.positive, letterSpacing: '-0.03em' }}>
               {latestScore.score}
             </p>
           </Card>
@@ -97,13 +102,14 @@ export default function FinancialSnapshot({ accounts = [], creditScores = [], ta
               justifyContent: 'space-between',
               padding: '8px 0',
               borderBottom: i < arr.length - 1 ? `1px solid ${colors.border.primary}` : 'none',
+              gap: '8px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '13px', color: colors.text.primary }}>{acct.name}</span>
-              <Badge variant={typeBadge[acct.type] || 'default'}>{capitalize(acct.type)}</Badge>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+              <span style={{ fontSize: '13px', color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{acct.name}</span>
+              {!isMobile && <Badge variant={typeBadge[acct.type] || 'default'}>{capitalize(acct.type)}</Badge>}
             </div>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: colors.text.primary, fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: colors.text.primary, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
               {formatCurrency(toNumber(acct.balance))}
             </span>
           </div>
@@ -138,17 +144,19 @@ export default function FinancialSnapshot({ accounts = [], creditScores = [], ta
                       justifyContent: 'space-between',
                       padding: '8px 0',
                       borderBottom: i < arr.length - 1 ? `1px solid ${colors.border.primary}` : 'none',
+                      gap: '8px',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '13px', color: colors.text.secondary }}>{acct.name}</span>
-                      <Badge variant="warning">{capitalize(acct.type)}</Badge>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                      <span style={{ fontSize: '13px', color: colors.text.secondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{acct.name}</span>
+                      {!isMobile && <Badge variant="warning">{capitalize(acct.type)}</Badge>}
                     </div>
                     <span style={{
                       fontSize: '13px',
                       fontWeight: 500,
                       fontVariantNumeric: 'tabular-nums',
                       color: bal > 0 ? colors.status.negative : colors.status.positive,
+                      flexShrink: 0,
                     }}>
                       {bal > 0 ? `-${formatCurrency(bal)}` : formatCurrency(bal)}
                     </span>

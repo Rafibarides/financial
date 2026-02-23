@@ -4,9 +4,11 @@ import Badge from '../common/Badge';
 import { colors } from '../../styles/colors';
 import { formatCurrency, toNumber, capitalize } from '../../utils/formatters';
 import { normalizeToUnit, frequencyLabel } from '../../utils/calculations';
+import useIsMobile from '../../hooks/useIsMobile';
 
 export default function CancelSimulator({ rules = [], categories = [] }) {
   const [cancelled, setCancelled] = useState(new Set());
+  const isMobile = useIsMobile();
 
   const catMap = useMemo(() => {
     const m = {};
@@ -43,7 +45,14 @@ export default function CancelSimulator({ rules = [], categories = [] }) {
 
   return (
     <Card>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: isMobile ? 'flex-start' : 'center',
+        marginBottom: '14px',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '10px' : '0',
+      }}>
         <div>
           <h3 style={{ fontSize: '13px', fontWeight: 500, color: colors.text.secondary, letterSpacing: '-0.01em' }}>
             Cancel Simulator
@@ -124,7 +133,7 @@ export default function CancelSimulator({ rules = [], categories = [] }) {
                 )}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                   <span style={{
                     fontSize: '13px',
                     color: colors.text.primary,
@@ -140,6 +149,7 @@ export default function CancelSimulator({ rules = [], categories = [] }) {
                 fontWeight: 500,
                 color: isCancelled ? colors.status.positive : colors.text.primary,
                 fontVariantNumeric: 'tabular-nums',
+                flexShrink: 0,
               }}>
                 {formatCurrency(rule.monthly)}/mo
               </span>

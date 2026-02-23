@@ -9,6 +9,7 @@ import { colors } from '../../styles/colors';
 import { formatCurrency, toNumber, capitalize } from '../../utils/formatters';
 import { normalizeToUnit, frequencyLabel, unitLabel } from '../../utils/calculations';
 import { TIME_UNITS } from '../../utils/constants';
+import useIsMobile from '../../hooks/useIsMobile';
 
 function TimeUnitToggle({ value, onChange }) {
   return (
@@ -43,6 +44,7 @@ export default function RecurringPanel({ rules = [], categories = [], tags = [] 
   const [freqFilter, setFreqFilter] = useState('');
   const [essentialFilter, setEssentialFilter] = useState('all');
   const [activeOnly, setActiveOnly] = useState(true);
+  const isMobile = useIsMobile();
 
   const catMap = useMemo(() => {
     const m = {};
@@ -106,7 +108,14 @@ export default function RecurringPanel({ rules = [], categories = [], tags = [] 
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+      <div style={{
+        display: 'flex',
+        alignItems: isMobile ? 'flex-start' : 'center',
+        justifyContent: 'space-between',
+        marginBottom: '20px',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '12px' : '0',
+      }}>
         <div>
           <h3 style={{ fontSize: '16px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.02em' }}>
             Recurring Payments
@@ -122,7 +131,7 @@ export default function RecurringPanel({ rules = [], categories = [], tags = [] 
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
         <Card padding="14px">
           <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
             Total {unitLabel(timeUnit)}
@@ -151,21 +160,27 @@ export default function RecurringPanel({ rules = [], categories = [], tags = [] 
 
       {/* Filters */}
       <Card style={{ marginBottom: '20px' }} padding="14px">
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '180px' }}>
+        <div style={{
+          display: 'flex',
+          gap: '10px',
+          alignItems: 'flex-end',
+          flexWrap: 'wrap',
+          flexDirection: isMobile ? 'column' : 'row',
+        }}>
+          <div style={{ flex: 1, minWidth: isMobile ? '100%' : '180px', width: isMobile ? '100%' : 'auto' }}>
             <TextInput placeholder="Search by name..." value={search} onChange={setSearch} />
           </div>
           <Select
             value={catFilter}
             onChange={setCatFilter}
             options={[{ value: '', label: 'All Categories' }, ...uniqueCats.map((c) => ({ value: c.id, label: c.name }))]}
-            style={{ width: '160px' }}
+            style={{ width: isMobile ? '100%' : '160px' }}
           />
           <Select
             value={freqFilter}
             onChange={setFreqFilter}
             options={[{ value: '', label: 'All Frequencies' }, ...uniqueFreqs.map((f) => ({ value: f, label: capitalize(f) }))]}
-            style={{ width: '150px' }}
+            style={{ width: isMobile ? '100%' : '150px' }}
           />
           <Select
             value={essentialFilter}
@@ -175,7 +190,7 @@ export default function RecurringPanel({ rules = [], categories = [], tags = [] 
               { value: 'essential', label: 'Essential Only' },
               { value: 'non-essential', label: 'Non-Essential Only' },
             ]}
-            style={{ width: '160px' }}
+            style={{ width: isMobile ? '100%' : '160px' }}
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Toggle value={activeOnly} onChange={setActiveOnly} />
@@ -195,6 +210,8 @@ export default function RecurringPanel({ rules = [], categories = [], tags = [] 
               borderRadius: '8px',
               background: colors.bg.elevated,
               cursor: 'default',
+              flex: isMobile ? '1 1 calc(50% - 4px)' : 'none',
+              minWidth: isMobile ? 0 : 'auto',
             }}
           >
             <p style={{ fontSize: '11px', color: colors.text.tertiary, marginBottom: '2px' }}>{cat.name}</p>
@@ -230,17 +247,19 @@ export default function RecurringPanel({ rules = [], categories = [], tags = [] 
               key={rule.id || i}
               style={{
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: isMobile ? 'flex-start' : 'center',
                 justifyContent: 'space-between',
                 padding: '12px 16px',
                 borderBottom: i < filtered.length - 1 ? `1px solid ${colors.border.primary}` : 'none',
                 transition: 'background 0.15s ease',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '4px' : '0',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = colors.bg.hover; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '13px', color: colors.text.primary, fontWeight: 500 }}>
                     {rule.name || rule.id}
                   </span>
@@ -263,6 +282,7 @@ export default function RecurringPanel({ rules = [], categories = [], tags = [] 
                 color: colors.text.primary,
                 fontVariantNumeric: 'tabular-nums',
                 letterSpacing: '-0.01em',
+                flexShrink: 0,
               }}>
                 {formatCurrency(normalized)}<span style={{ fontSize: '11px', fontWeight: 400, color: colors.text.muted }}>{unitLabel(timeUnit)}</span>
               </span>

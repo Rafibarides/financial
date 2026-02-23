@@ -8,6 +8,7 @@ import Loader from '../components/common/Loader';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
 import MetricCard from '../components/dashboard/MetricCard';
+import useIsMobile from '../hooks/useIsMobile';
 
 const sheets = [
   SHEET_NAMES.ACCOUNT,
@@ -53,6 +54,7 @@ function AccountIcon({ type }) {
 
 export default function Accounts() {
   const { data, loading, error } = useMultipleSheets(sheets);
+  const isMobile = useIsMobile();
 
   const accounts = data[SHEET_NAMES.ACCOUNT] || [];
   const creditRules = data[SHEET_NAMES.CREDIT_RULE] || [];
@@ -95,7 +97,7 @@ export default function Accounts() {
   return (
     <div>
       <div style={{ marginBottom: '28px' }}>
-        <h2 style={{ fontSize: '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
+        <h2 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
           Accounts
         </h2>
         <p style={{ fontSize: '13px', color: colors.text.tertiary, marginTop: '2px' }}>
@@ -103,7 +105,7 @@ export default function Accounts() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: isMobile ? '8px' : '16px', marginBottom: '24px' }}>
         <MetricCard label="Total Assets" value={formatCurrency(stats.total)} />
         <MetricCard label="Liquid Cash" value={formatCurrency(stats.liquid)} accentColor={colors.accent.blue} />
         <MetricCard label="Invested" value={formatCurrency(stats.invested)} accentColor={colors.accent.purple} />
@@ -114,18 +116,25 @@ export default function Accounts() {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
         {accounts.map((acct) => {
           const balance = toNumber(acct.balance);
           const subsidies = creditsByAccount[acct.id] || [];
 
           return (
             <Card key={acct.id}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: subsidies.length > 0 ? '16px' : '0' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: isMobile ? 'flex-start' : 'center',
+                justifyContent: 'space-between',
+                marginBottom: subsidies.length > 0 ? '16px' : '0',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '10px' : '0',
+              }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <AccountIcon type={acct.type} />
                   <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <h3 style={{ fontSize: '15px', fontWeight: 500, color: colors.text.primary }}>
                       {acct.name}
                     </h3>
@@ -144,6 +153,7 @@ export default function Accounts() {
                   color: colors.text.primary,
                   fontVariantNumeric: 'tabular-nums',
                   letterSpacing: '-0.02em',
+                  marginLeft: isMobile ? '48px' : '0',
                 }}>
                   {formatCurrency(balance)}
                 </span>
@@ -170,10 +180,10 @@ export default function Accounts() {
                           fontSize: '12px',
                         }}
                       >
-                        <span style={{ color: colors.text.secondary }}>
+                        <span style={{ color: colors.text.secondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>
                           {rule.name || rule.id}
                         </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginLeft: '8px' }}>
                           <span style={{
                             color: colors.status.positive,
                             fontVariantNumeric: 'tabular-nums',

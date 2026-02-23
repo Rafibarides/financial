@@ -5,6 +5,7 @@ import Select from '../common/Select';
 import { colors } from '../../styles/colors';
 import { formatCurrency, formatDateShort, toNumber } from '../../utils/formatters';
 import { MONTHS_SHORT } from '../../utils/constants';
+import useIsMobile from '../../hooks/useIsMobile';
 
 export default function IncomePanel({ transactions = [], incomeSources = [], categories = [], recurringRules = [] }) {
   const now = new Date();
@@ -12,6 +13,7 @@ export default function IncomePanel({ transactions = [], incomeSources = [], cat
   const [monthFilter, setMonthFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('');
   const [expandedSource, setExpandedSource] = useState(null);
+  const isMobile = useIsMobile();
 
   const sourceMap = useMemo(() => {
     const m = {};
@@ -105,28 +107,35 @@ export default function IncomePanel({ transactions = [], incomeSources = [], cat
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+      <div style={{
+        display: 'flex',
+        alignItems: isMobile ? 'flex-start' : 'center',
+        justifyContent: 'space-between',
+        marginBottom: '16px',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '12px' : '0',
+      }}>
         <h3 style={{ fontSize: '16px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.02em' }}>
           Income Streams
         </h3>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
           <Select
             value={yearFilter}
             onChange={setYearFilter}
             options={[{ value: 'all', label: 'All Years' }, ...years.map((y) => ({ value: y, label: y }))]}
-            style={{ width: '110px' }}
+            style={{ width: isMobile ? 'calc(50% - 4px)' : '110px' }}
           />
           <Select
             value={monthFilter}
             onChange={setMonthFilter}
             options={[{ value: 'all', label: 'All Months' }, ...MONTHS_SHORT.map((m, i) => ({ value: String(i), label: m }))]}
-            style={{ width: '120px' }}
+            style={{ width: isMobile ? 'calc(50% - 4px)' : '120px' }}
           />
           <Select
             value={sourceFilter}
             onChange={setSourceFilter}
             options={[{ value: '', label: 'All Sources' }, ...incomeSources.map((s) => ({ value: s.id, label: s.name }))]}
-            style={{ width: '160px' }}
+            style={{ width: isMobile ? '100%' : '160px' }}
           />
         </div>
       </div>
@@ -141,7 +150,7 @@ export default function IncomePanel({ transactions = [], incomeSources = [], cat
         </div>
       </Card>
 
-      {/* Source cards — click to expand, sorted highest to lowest */}
+      {/* Source cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {bySource.map((src) => {
           const isExpanded = expandedSource === src.id;
@@ -153,16 +162,18 @@ export default function IncomePanel({ transactions = [], incomeSources = [], cat
                 onClick={() => setExpandedSource(isExpanded ? null : src.id)}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: isMobile ? 'flex-start' : 'center',
                   justifyContent: 'space-between',
                   padding: '14px 16px',
                   cursor: 'pointer',
                   transition: 'background 0.15s ease',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: isMobile ? '8px' : '0',
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = colors.bg.hover; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span style={{
                     fontSize: '11px',
                     color: colors.text.muted,
@@ -180,7 +191,7 @@ export default function IncomePanel({ transactions = [], incomeSources = [], cat
                     </span>
                   )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: isMobile ? '19px' : '0' }}>
                   <span style={{ fontSize: '11px', color: colors.text.muted }}>{src.count} payment{src.count !== 1 ? 's' : ''}</span>
                   <span style={{ fontSize: '16px', fontWeight: 600, color: colors.status.positive, fontVariantNumeric: 'tabular-nums' }}>
                     {formatCurrency(src.total)}
@@ -199,20 +210,20 @@ export default function IncomePanel({ transactions = [], incomeSources = [], cat
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          padding: '9px 16px 9px 38px',
+                          padding: isMobile ? '9px 16px' : '9px 16px 9px 38px',
                           borderBottom: i < src.transactions.length - 1 ? `1px solid ${colors.border.primary}` : 'none',
                           fontSize: '12px',
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ color: colors.text.muted, fontVariantNumeric: 'tabular-nums', minWidth: '70px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+                          <span style={{ color: colors.text.muted, fontVariantNumeric: 'tabular-nums', minWidth: '70px', flexShrink: 0 }}>
                             {formatDateShort(tx.transaction_date)}
                           </span>
-                          <span style={{ color: colors.text.secondary }}>
+                          <span style={{ color: colors.text.secondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {tx.description}
                           </span>
                         </div>
-                        <span style={{ color: colors.status.positive, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
+                        <span style={{ color: colors.status.positive, fontWeight: 500, fontVariantNumeric: 'tabular-nums', flexShrink: 0, marginLeft: '8px' }}>
                           +{formatCurrency(amt)}
                         </span>
                       </div>

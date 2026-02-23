@@ -65,3 +65,18 @@ a {
   background: rgba(149, 127, 255, 0.3);
   color: #FFFFFF;
 }
+
+@media (max-width: 767px) {
+  body {
+    font-size: 13px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}

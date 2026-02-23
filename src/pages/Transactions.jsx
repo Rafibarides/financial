@@ -11,6 +11,7 @@ import Badge from '../components/common/Badge';
 import TextInput from '../components/common/TextInput';
 import Select from '../components/common/Select';
 import MetricCard from '../components/dashboard/MetricCard';
+import useIsMobile from '../hooks/useIsMobile';
 
 const sheets = [
   SHEET_NAMES.TRANSACTION,
@@ -25,6 +26,7 @@ export default function Transactions() {
   const { data, loading, error } = useMultipleSheets(sheets);
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
+  const isMobile = useIsMobile();
 
   const transactions = data[SHEET_NAMES.TRANSACTION] || [];
   const categories = data[SHEET_NAMES.CATEGORY] || [];
@@ -81,7 +83,41 @@ export default function Transactions() {
     return { income, expenses, net: income - expenses, count: filtered.length };
   }, [filtered]);
 
-  const columns = [
+  const columns = isMobile ? [
+    {
+      key: 'transaction_date',
+      label: 'Date',
+      width: '70px',
+      render: (val) => (
+        <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: '11px' }}>{formatDateShort(val)}</span>
+      ),
+    },
+    {
+      key: 'description',
+      label: 'Description',
+      render: (val) => (
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: '120px' }}>{val}</span>
+      ),
+    },
+    {
+      key: 'amount',
+      label: 'Amount',
+      align: 'right',
+      render: (val) => {
+        const num = toNumber(val);
+        return (
+          <span style={{
+            fontWeight: 500,
+            fontVariantNumeric: 'tabular-nums',
+            color: num > 0 ? colors.status.positive : colors.text.primary,
+            fontSize: '12px',
+          }}>
+            {num > 0 ? '+' : ''}{formatCurrency(num)}
+          </span>
+        );
+      },
+    },
+  ] : [
     {
       key: 'transaction_date',
       label: 'Date',
@@ -149,7 +185,7 @@ export default function Transactions() {
   return (
     <div>
       <div style={{ marginBottom: '28px' }}>
-        <h2 style={{ fontSize: '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
+        <h2 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
           Transactions
         </h2>
         <p style={{ fontSize: '13px', color: colors.text.tertiary, marginTop: '2px' }}>
@@ -157,7 +193,7 @@ export default function Transactions() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: isMobile ? '8px' : '16px', marginBottom: '24px' }}>
         <MetricCard label="Total Transactions" value={stats.count} />
         <MetricCard label="Income" value={formatCurrency(stats.income)} accentColor={colors.status.positive} />
         <MetricCard label="Expenses" value={formatCurrency(stats.expenses)} />
@@ -169,8 +205,14 @@ export default function Transactions() {
       </div>
 
       <Card style={{ marginBottom: '16px', padding: '16px' }}>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '200px' }}>
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'flex-end',
+          flexWrap: 'wrap',
+          flexDirection: isMobile ? 'column' : 'row',
+        }}>
+          <div style={{ flex: 1, minWidth: isMobile ? '100%' : '200px', width: isMobile ? '100%' : 'auto' }}>
             <TextInput
               placeholder="Search by description, amount..."
               value={search}
@@ -184,7 +226,7 @@ export default function Transactions() {
               { value: '', label: 'All Categories' },
               ...categories.filter((c) => c.is_active !== 'false').map((c) => ({ value: c.id, label: c.name })),
             ]}
-            style={{ width: '160px' }}
+            style={{ width: isMobile ? '100%' : '160px' }}
           />
           <Select
             value={filters.account_id || ''}
@@ -193,7 +235,7 @@ export default function Transactions() {
               { value: '', label: 'All Accounts' },
               ...accounts.map((a) => ({ value: a.id, label: a.name })),
             ]}
-            style={{ width: '160px' }}
+            style={{ width: isMobile ? '100%' : '160px' }}
           />
           <Select
             value={filters.source_type || ''}
@@ -204,38 +246,38 @@ export default function Transactions() {
               { value: 'rule', label: 'Rule' },
               { value: 'import', label: 'Import' },
             ]}
-            style={{ width: '130px' }}
+            style={{ width: isMobile ? '100%' : '130px' }}
           />
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', width: isMobile ? '100%' : 'auto' }}>
             <TextInput
               label="From"
               type="date"
               value={dateRange.from}
               onChange={(v) => setDateRange((p) => ({ ...p, from: v }))}
-              style={{ width: '140px', colorScheme: 'dark' }}
+              style={{ width: isMobile ? '50%' : '140px', colorScheme: 'dark' }}
             />
             <TextInput
               label="To"
               type="date"
               value={dateRange.to}
               onChange={(v) => setDateRange((p) => ({ ...p, to: v }))}
-              style={{ width: '140px', colorScheme: 'dark' }}
+              style={{ width: isMobile ? '50%' : '140px', colorScheme: 'dark' }}
             />
           </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', width: isMobile ? '100%' : 'auto' }}>
             <TextInput
               label="Min $"
               type="number"
               value={amountRange.min}
               onChange={(v) => setAmountRange((p) => ({ ...p, min: v }))}
-              style={{ width: '90px' }}
+              style={{ width: isMobile ? '50%' : '90px' }}
             />
             <TextInput
               label="Max $"
               type="number"
               value={amountRange.max}
               onChange={(v) => setAmountRange((p) => ({ ...p, max: v }))}
-              style={{ width: '90px' }}
+              style={{ width: isMobile ? '50%' : '90px' }}
             />
           </div>
         </div>

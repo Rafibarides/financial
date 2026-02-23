@@ -8,6 +8,7 @@ import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import TextInput from '../components/common/TextInput';
 import { appendRow } from '../services/sheets';
+import useIsMobile from '../hooks/useIsMobile';
 
 const sheets = [SHEET_NAMES.ENVELOPE, SHEET_NAMES.ENVELOPE_CONTRIBUTION];
 
@@ -145,7 +146,7 @@ function EnvelopeCard({ envelope, total, onOpen, recentDeposit }) {
   );
 }
 
-function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, onWithdraw }) {
+function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, onWithdraw, isMobile }) {
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [action, setAction] = useState('deposit');
@@ -180,7 +181,7 @@ function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, on
             {'\u2190'}
           </button>
           <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: envColor }} />
-          <h2 style={{ fontSize: '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
+          <h2 style={{ fontSize: isMobile ? '18px' : '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
             {envelope.name}
           </h2>
         </div>
@@ -192,7 +193,7 @@ function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, on
           <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
             Balance
           </p>
-          <p style={{ fontSize: '32px', fontWeight: 700, color: colors.text.primary, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+          <p style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 700, color: colors.text.primary, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
             {formatCurrency(total)}
           </p>
         </Card>
@@ -201,7 +202,7 @@ function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, on
             <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>
               Goal
             </p>
-            <p style={{ fontSize: '32px', fontWeight: 700, color: envColor, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+            <p style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 700, color: envColor, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
               {formatCurrency(goal)}
             </p>
             <div style={{ width: '100%', height: '6px', borderRadius: '3px', background: colors.border.primary, marginTop: '12px', overflow: 'hidden' }}>
@@ -252,14 +253,19 @@ function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, on
             Withdraw
           </button>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
-          <div style={{ flex: 1 }}>
+        <div style={{
+          display: 'flex',
+          gap: '10px',
+          alignItems: 'flex-end',
+          flexDirection: isMobile ? 'column' : 'row',
+        }}>
+          <div style={{ flex: 1, width: isMobile ? '100%' : 'auto' }}>
             <TextInput label="Amount" type="number" value={amount} onChange={setAmount} placeholder="0.00" prefix="$" />
           </div>
-          <div style={{ flex: 2 }}>
+          <div style={{ flex: 2, width: isMobile ? '100%' : 'auto' }}>
             <TextInput label="Note (optional)" value={note} onChange={setNote} placeholder="What is this for?" />
           </div>
-          <Button onClick={handleSubmit} disabled={!amount || parseFloat(amount) <= 0}>
+          <Button onClick={handleSubmit} disabled={!amount || parseFloat(amount) <= 0} style={isMobile ? { width: '100%' } : {}}>
             {action === 'deposit' ? 'Deposit' : 'Withdraw'}
           </Button>
         </div>
@@ -290,7 +296,7 @@ function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, on
                 animation: i === 0 ? 'moneyDrop 0.4s ease' : 'none',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
                 <div style={{
                   width: '28px',
                   height: '28px',
@@ -300,11 +306,12 @@ function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, on
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '14px',
+                  flexShrink: 0,
                 }}>
                   {isDeposit ? '+' : '-'}
                 </div>
-                <div>
-                  <p style={{ fontSize: '13px', color: colors.text.primary }}>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: '13px', color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {c.note || (isDeposit ? 'Deposit' : 'Withdrawal')}
                   </p>
                   <p style={{ fontSize: '11px', color: colors.text.muted }}>{formatDate(c.date)}</p>
@@ -315,6 +322,8 @@ function EnvelopeDetail({ envelope, contributions, total, onClose, onDeposit, on
                 fontWeight: 600,
                 color: isDeposit ? colors.status.positive : colors.status.negative,
                 fontVariantNumeric: 'tabular-nums',
+                flexShrink: 0,
+                marginLeft: '8px',
               }}>
                 {isDeposit ? '+' : '-'}{formatCurrency(amt)}
               </span>
@@ -341,7 +350,7 @@ function NewEnvelopeForm({ onSubmit, onCancel }) {
         <TextInput label="Goal amount (optional)" type="number" value={goal} onChange={setGoal} placeholder="0.00" prefix="$" />
         <div>
           <label style={{ fontSize: '12px', color: colors.text.tertiary, display: 'block', marginBottom: '6px' }}>Color</label>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {ENVELOPE_COLORS.map((c) => (
               <button
                 key={c}
@@ -375,6 +384,7 @@ export default function Envelopes() {
   const [selectedId, setSelectedId] = useState(null);
   const [creating, setCreating] = useState(false);
   const [recentDeposit, setRecentDeposit] = useState(null);
+  const isMobile = useIsMobile();
 
   const envelopes = data[SHEET_NAMES.ENVELOPE] || [];
   const contributions = data[SHEET_NAMES.ENVELOPE_CONTRIBUTION] || [];
@@ -452,6 +462,7 @@ export default function Envelopes() {
           onClose={() => setSelectedId(null)}
           onDeposit={(amt, note) => handleDeposit(selectedId, amt, note)}
           onWithdraw={(amt, note) => handleWithdraw(selectedId, amt, note)}
+          isMobile={isMobile}
         />
       </div>
     );
@@ -461,9 +472,16 @@ export default function Envelopes() {
     <div>
       <style>{keyframes}</style>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
+      <div style={{
+        display: 'flex',
+        alignItems: isMobile ? 'flex-start' : 'center',
+        justifyContent: 'space-between',
+        marginBottom: '28px',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '12px' : '0',
+      }}>
         <div>
-          <h2 style={{ fontSize: '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
+          <h2 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
             Envelopes
           </h2>
           <p style={{ fontSize: '13px', color: colors.text.tertiary, marginTop: '2px' }}>
@@ -496,7 +514,7 @@ export default function Envelopes() {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))',
         gap: '16px',
       }}>
         {envelopes

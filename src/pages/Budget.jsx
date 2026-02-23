@@ -9,6 +9,7 @@ import Button from '../components/common/Button';
 import Select from '../components/common/Select';
 import Toggle from '../components/common/Toggle';
 import { updateRow } from '../services/sheets';
+import useIsMobile from '../hooks/useIsMobile';
 
 const sheets = [
   SHEET_NAMES.BUDGET_PLAN,
@@ -25,6 +26,7 @@ export default function Budget() {
   const [saving, setSaving] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [compMonth, setCompMonth] = useState('');
+  const isMobile = useIsMobile();
 
   const plans = data[SHEET_NAMES.BUDGET_PLAN] || [];
   const items = data[SHEET_NAMES.BUDGET_ITEM] || [];
@@ -218,16 +220,23 @@ export default function Budget() {
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
+      <div style={{
+        display: 'flex',
+        alignItems: isMobile ? 'flex-start' : 'center',
+        justifyContent: 'space-between',
+        marginBottom: '28px',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '12px' : '0',
+      }}>
         <div>
-          <h2 style={{ fontSize: '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
+          <h2 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
             Monthly Budget Plan
           </h2>
           <p style={{ fontSize: '13px', color: colors.text.tertiary, marginTop: '2px' }}>
             Allocate within your fixed monthly income
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {editing ? (
             <>
               <Button variant="ghost" onClick={resetAll}>Reset to Zero</Button>
@@ -245,12 +254,12 @@ export default function Budget() {
       {activePlan ? (
         <>
           {/* Income ceiling + allocation total */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: isMobile ? '8px' : '16px', marginBottom: '24px' }}>
             <Card padding="16px">
               <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
                 Fixed Monthly Income
               </p>
-              <p style={{ fontSize: '26px', fontWeight: 600, color: colors.status.positive, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+              <p style={{ fontSize: isMobile ? '22px' : '26px', fontWeight: 600, color: colors.status.positive, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
                 {formatCurrency(fixedMonthlyIncome)}
               </p>
               <p style={{ fontSize: '11px', color: colors.text.muted, marginTop: '4px' }}>
@@ -261,7 +270,7 @@ export default function Budget() {
               <p style={{ fontSize: '11px', color: colors.text.tertiary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
                 Total Allocated
               </p>
-              <p style={{ fontSize: '26px', fontWeight: 600, color: colors.accent.purple, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+              <p style={{ fontSize: isMobile ? '22px' : '26px', fontWeight: 600, color: colors.accent.purple, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
                 {formatCurrency(totalAllocated)}
               </p>
               <p style={{ fontSize: '11px', color: colors.text.muted, marginTop: '4px' }}>
@@ -273,7 +282,7 @@ export default function Budget() {
                 Remaining
               </p>
               <p style={{
-                fontSize: '26px',
+                fontSize: isMobile ? '22px' : '26px',
                 fontWeight: 600,
                 color: remaining >= 0 ? colors.text.primary : colors.status.negative,
                 letterSpacing: '-0.03em',
@@ -349,7 +358,7 @@ export default function Budget() {
                           value={editValues[item.id] ?? ''}
                           onChange={(e) => updateItem(item.id, parseFloat(e.target.value) || 0)}
                           style={{
-                            width: '100px',
+                            width: isMobile ? '80px' : '100px',
                             background: colors.bg.surface,
                             border: `1px solid ${colors.border.secondary}`,
                             borderRadius: '6px',
@@ -449,7 +458,13 @@ export default function Budget() {
 
           {/* Compare section */}
           <Card padding="14px">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              justifyContent: 'space-between',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: isMobile ? '12px' : '0',
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div>
                   <p style={{ fontSize: '13px', color: colors.text.secondary, fontWeight: 500 }}>

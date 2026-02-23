@@ -11,6 +11,7 @@ import TransactionLog from '../components/input/TransactionLog';
 import QuickAdd from '../components/input/QuickAdd';
 import CSVImport from '../components/input/CSVImport';
 import { appendRow } from '../services/sheets';
+import useIsMobile from '../hooks/useIsMobile';
 
 const sheets = [
   SHEET_NAMES.CATEGORY,
@@ -21,6 +22,7 @@ const sheets = [
 export default function Input() {
   const { data, loading, error, reload } = useMultipleSheets(sheets);
   const [submitting, setSubmitting] = useState(false);
+  const isMobile = useIsMobile();
 
   const categories = data[SHEET_NAMES.CATEGORY] || [];
   const accounts = data[SHEET_NAMES.ACCOUNT] || [];
@@ -98,7 +100,7 @@ export default function Input() {
   return (
     <div>
       <div style={{ marginBottom: '28px' }}>
-        <h2 style={{ fontSize: '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
+        <h2 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
           Input
         </h2>
         <p style={{ fontSize: '13px', color: colors.text.tertiary, marginTop: '2px' }}>
@@ -126,15 +128,21 @@ export default function Input() {
       </div>
 
       {/* Filters + log */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'flex-end' }}>
-        <div style={{ flex: 1, maxWidth: '300px' }}>
+      <div style={{
+        display: 'flex',
+        gap: '12px',
+        marginBottom: '16px',
+        alignItems: 'flex-end',
+        flexDirection: isMobile ? 'column' : 'row',
+      }}>
+        <div style={{ flex: 1, maxWidth: isMobile ? '100%' : '300px', width: isMobile ? '100%' : 'auto' }}>
           <TextInput placeholder="Search transactions..." value={search} onChange={setSearch} />
         </div>
         <Select
           value={filters.category_id || ''}
           onChange={(v) => updateFilter('category_id', v)}
           options={[{ value: '', label: 'All Categories' }, ...expenseCategories.map((c) => ({ value: c.id, label: c.name }))]}
-          style={{ width: '180px' }}
+          style={{ width: isMobile ? '100%' : '180px' }}
         />
       </div>
 
@@ -149,7 +157,7 @@ export default function Input() {
       {submitting && (
         <div style={{
           position: 'fixed',
-          bottom: '24px',
+          bottom: isMobile ? '80px' : '24px',
           right: '24px',
           background: colors.bg.elevated,
           borderRadius: '8px',

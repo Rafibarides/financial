@@ -13,6 +13,7 @@ import CategoryPieChart from '../components/charts/CategoryPieChart';
 import SpendingChart from '../components/charts/SpendingChart';
 import { toNumber } from '../utils/formatters';
 import { MONTHS_SHORT } from '../utils/constants';
+import useIsMobile from '../hooks/useIsMobile';
 
 const sheets = [
   SHEET_NAMES.ACCOUNT,
@@ -51,6 +52,7 @@ function SectionDivider({ label }) {
 
 export default function Dashboard() {
   const { data, loading, error } = useMultipleSheets(sheets);
+  const isMobile = useIsMobile();
 
   const accounts = data[SHEET_NAMES.ACCOUNT] || [];
   const transactions = data[SHEET_NAMES.TRANSACTION] || [];
@@ -114,7 +116,7 @@ export default function Dashboard() {
   return (
     <div>
       <div style={{ marginBottom: '8px' }}>
-        <h2 style={{ fontSize: '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
+        <h2 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 600, color: colors.text.primary, letterSpacing: '-0.03em' }}>
           Dashboard
         </h2>
       </div>
@@ -139,7 +141,7 @@ export default function Dashboard() {
 
       <SectionDivider label="Spending Breakdown" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
         <CategoryPieChart data={recurringCategorySpending} title="Recurring by Category (Monthly)" />
         <SpendingChart data={spendingByMonth} title="Total Spending Over Time" />
       </div>

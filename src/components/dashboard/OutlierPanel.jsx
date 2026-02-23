@@ -2,6 +2,7 @@ import Card from '../common/Card';
 import Badge from '../common/Badge';
 import { colors } from '../../styles/colors';
 import { formatCurrency } from '../../utils/formatters';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const POPULAR_PURCHASES = [
   { name: 'Aksaray Chicken Gyro', cost: 22.00, frequency: '~3x/month', category: 'Food' },
@@ -27,11 +28,12 @@ function estimateMonthly(items) {
 }
 
 export default function OutlierPanel() {
+  const isMobile = useIsMobile();
   const popularMonthly = estimateMonthly(POPULAR_PURCHASES);
   const outlyingMonthly = estimateMonthly(OUTLYING_CHARGES);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
       {/* Popular purchases */}
       <Card>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
@@ -56,14 +58,14 @@ export default function OutlierPanel() {
               borderBottom: `1px solid ${colors.border.primary}`,
             }}
           >
-            <div>
-              <p style={{ fontSize: '13px', color: colors.text.primary }}>{item.name}</p>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontSize: '13px', color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
               <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }}>
                 <Badge>{item.category}</Badge>
                 <span style={{ fontSize: '10px', color: colors.text.muted }}>{item.frequency}</span>
               </div>
             </div>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: colors.text.primary, fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: colors.text.primary, fontVariantNumeric: 'tabular-nums', flexShrink: 0, marginLeft: '8px' }}>
               {formatCurrency(item.cost)}
             </span>
           </div>
@@ -94,15 +96,15 @@ export default function OutlierPanel() {
               borderBottom: `1px solid ${colors.border.primary}`,
             }}
           >
-            <div>
-              <p style={{ fontSize: '13px', color: colors.text.primary }}>{item.name}</p>
-              <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontSize: '13px', color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
+              <div style={{ display: 'flex', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>
                 <Badge>{item.category}</Badge>
                 <span style={{ fontSize: '10px', color: colors.text.muted }}>{item.frequency}</span>
                 {item.note && <span style={{ fontSize: '10px', color: colors.text.muted }}>({item.note})</span>}
               </div>
             </div>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: colors.text.primary, fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: colors.text.primary, fontVariantNumeric: 'tabular-nums', flexShrink: 0, marginLeft: '8px' }}>
               {formatCurrency(item.cost)}
             </span>
           </div>

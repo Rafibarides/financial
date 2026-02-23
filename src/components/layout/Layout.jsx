@@ -3,34 +3,36 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { colors } from '../../styles/colors';
 import { useAppData } from '../../context/DataContext';
+import useIsMobile from '../../hooks/useIsMobile';
 
 export default function Layout() {
   const { refreshing } = useAppData();
   const [collapsed, setCollapsed] = useState(false);
-  const sidebarWidth = collapsed ? '60px' : '220px';
+  const isMobile = useIsMobile();
+  const sidebarWidth = isMobile ? '0px' : (collapsed ? '60px' : '220px');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: colors.bg.primary }}>
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: '100vh', background: colors.bg.primary }}>
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} isMobile={isMobile} />
       <main style={{
         flex: 1,
-        marginLeft: sidebarWidth,
-        padding: '32px',
+        marginLeft: isMobile ? 0 : sidebarWidth,
+        padding: isMobile ? '16px 16px 80px' : '32px',
         minHeight: '100vh',
-        maxWidth: `calc(100vw - ${sidebarWidth})`,
+        maxWidth: isMobile ? '100vw' : `calc(100vw - ${sidebarWidth})`,
         overflowX: 'hidden',
-        transition: 'margin-left 0.2s ease, max-width 0.2s ease',
+        transition: isMobile ? 'none' : 'margin-left 0.2s ease, max-width 0.2s ease',
       }}>
         {refreshing && (
           <div style={{
             position: 'fixed',
             top: 0,
-            left: sidebarWidth,
+            left: isMobile ? 0 : sidebarWidth,
             right: 0,
             height: '2px',
             zIndex: 50,
             overflow: 'hidden',
-            transition: 'left 0.2s ease',
+            transition: isMobile ? 'none' : 'left 0.2s ease',
           }}>
             <div style={{
               width: '30%',
